@@ -163,7 +163,7 @@ export default function Home() {
                       <FormItem>
                         <FormLabel>비밀번호</FormLabel>
                         <FormControl>
-                          <Input {...field} type="password" defaultValue={""} />
+                          <Input {...field} type="password" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
