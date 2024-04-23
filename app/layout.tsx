@@ -26,7 +26,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ModeToggle />
+          <ModeToggle className={"absolute top-6 right-6"} />
           {children}
         </ThemeProvider>
         <Toaster />
