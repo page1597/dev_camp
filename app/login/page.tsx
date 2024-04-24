@@ -1,15 +1,5 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -26,11 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { formSchema } from "@/validators/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CaretLeftIcon, CaretRightIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 export default function Home() {
   const [step, setStep] = useState<number>(0);
@@ -48,9 +43,6 @@ export default function Home() {
     },
   });
 
-  // 폼 데이터가 변화할 때마다 콘솔창 출력
-  console.log(form.watch());
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { password, confirmPassword } = values;
     if (password !== confirmPassword) {
@@ -61,25 +53,24 @@ export default function Home() {
       });
       return;
     }
+    // 폼 제출 시 처리
     alert(JSON.stringify(values, null, 4));
   }
-
   return (
-    <main className="min-h-screen">
-      <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-        <Card className="w-[380px]">
-          <CardHeader>
-            <CardTitle>계정을 생성합니다</CardTitle>
-            <CardDescription>필수 정보를 입력해볼게요.</CardDescription>
-          </CardHeader>
-          <CardContent>
+    <main className="h-screen bg-stone-200 flex flex-col justify-center items-center">
+      <div className="h-4/5 w-10/12 bg-white rounded-2xl overflow-hidden flex flex-row">
+        <div className="w-[50%] flex justify-center items-center">
+          <div className="w-full">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="relative space-y-3 overflow-x-hidden"
+                className="relative space-y-8"
               >
+                <h1 className="text-stone-800 font-semibold font-sans text-lg text-center">
+                  Create account
+                </h1>
                 <motion.div
-                  className="space-y-3"
+                  className="space-y-4 px-10"
                   animate={{ translateX: `${step * -100}%` }}
                   transition={{ ease: "easeInOut" }}
                 >
@@ -88,11 +79,13 @@ export default function Home() {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>이름</FormLabel>
+                        <span className="flex items-center justify-between">
+                          <FormLabel>name</FormLabel>
+                          <FormMessage className="text-xs" />
+                        </span>
                         <FormControl>
-                          <Input placeholder="홍길동" {...field} />
+                          <Input {...field} className="rounded-sm" />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -101,14 +94,16 @@ export default function Home() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>이메일</FormLabel>
+                        <span className="flex items-center justify-between">
+                          <FormLabel>E-mail</FormLabel>
+                          <FormMessage className="text-xs" />
+                        </span>
                         <FormControl>
                           <Input
                             placeholder="hello@sparta-devcamp.com"
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -117,11 +112,13 @@ export default function Home() {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>연락처</FormLabel>
+                        <span className="flex items-center justify-between">
+                          <FormLabel>phone</FormLabel>
+                          <FormMessage className="text-xs " />
+                        </span>
                         <FormControl>
                           <Input placeholder="01000000000" {...field} />
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -130,28 +127,27 @@ export default function Home() {
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>역할</FormLabel>
+                        <span className="flex items-center justify-between">
+                          <FormLabel>role</FormLabel>
+                          <FormMessage className="text-xs " />
+                        </span>
                         <FormControl>
                           <Select onValueChange={field.onChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="역할을 선택해주세요." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="관리자">관리자</SelectItem>
-                              <SelectItem value="일반사용자">
-                                일반사용자
-                              </SelectItem>
+                              <SelectItem value="admin">admin</SelectItem>
+                              <SelectItem value="user">user</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </motion.div>
-
                 <motion.div
-                  className="space-y-3 absolute top-0 left-0 right-0"
+                  className="space-y-4 px-10 absolute top-10 left-0 right-0"
                   animate={{ translateX: `${(1 - step) * 100}%` }}
                   style={{ translateX: `${(1 - step) * 100}%` }}
                   transition={{ ease: "easeInOut" }}
@@ -161,7 +157,7 @@ export default function Home() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>비밀번호</FormLabel>
+                        <FormLabel>password</FormLabel>
                         <FormControl>
                           <Input {...field} type="password" />
                         </FormControl>
@@ -174,7 +170,7 @@ export default function Home() {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>비밀번호 확인</FormLabel>
+                        <FormLabel>confirm password</FormLabel>
                         <FormControl>
                           <Input type="password" {...field} />
                         </FormControl>
@@ -183,16 +179,13 @@ export default function Home() {
                     )}
                   />
                 </motion.div>
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    className={step === 1 ? "display" : "hidden"}
-                  >
-                    계정 등록하기
-                  </Button>
+                <div className="absolute inset-x-0 flex justify-between px-6">
                   <Button
                     type="button"
-                    className={step === 0 ? "display" : "hidden"}
+                    variant="outline"
+                    className={`${
+                      step === 0 ? "display" : "hidden"
+                    } px-2 rounded-full ml-auto`}
                     onClick={() => {
                       // 별도의 함수로 빼서 작성하기
                       form.trigger(["phone", "email", "username", "role"]);
@@ -211,24 +204,43 @@ export default function Home() {
                       setStep(1);
                     }}
                   >
-                    다음 단계로
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <CaretRightIcon width={24} height={24} />
                   </Button>
+
                   <Button
                     type="button"
-                    variant="ghost"
-                    className={step === 1 ? "display" : "hidden"}
+                    variant="outline"
+                    className={`${
+                      step === 1 ? "display" : "hidden"
+                    } px-2 rounded-full`}
                     onClick={() => {
                       setStep(0);
                     }}
                   >
-                    이전 단계로
+                    <CaretLeftIcon width={24} height={24} />
+                  </Button>
+                  <Button
+                    type="submit"
+                    className={`${
+                      step === 1 ? "display" : "hidden"
+                    } p-2 right-0 rounded-full bg-stone-800`}
+                  >
+                    <Check width={24} height={24} />
                   </Button>
                 </div>
               </form>
             </Form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        <div className="w-[50%] h-full relative">
+          <Image
+            src="/images/sight.jpg"
+            alt="background"
+            layout="fill"
+            // objectFit="cover"
+          />
+        </div>
       </div>
     </main>
   );
