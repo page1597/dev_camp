@@ -3,7 +3,7 @@ const phoneRegex = /^010\d{8}$/;
 const passwordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 
-export const formSchema = z.object({
+export const signUpFormSchema = z.object({
   username: z
     .string()
     .min(2, "이름은 2글자 이상이어야 합니다.")
@@ -30,4 +30,11 @@ export const formSchema = z.object({
       passwordRegex,
       "비밀번호는 최소 6자리 이상, 영문, 숫자, 특수문자를 포함해야 합니다."
     ),
+  logInEmail: z.string(),
+  logInPassword: z.string(),
+});
+
+export const logInFormSchema = z.object({
+  email: z.string(),
+  password: z.string(),
 });
