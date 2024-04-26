@@ -31,7 +31,6 @@ import { z } from "zod";
 export default function Home() {
   const [step, setStep] = useState<number>(0);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [email, setEmail] = useState("");
   const { toast } = useToast();
 
   const signUpForm = useForm<z.infer<typeof signUpFormSchema>>({

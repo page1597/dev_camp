@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { formSchema } from "@/validators/auth";
+import { signUpFormSchema } from "@/validators/auth";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
@@ -36,8 +36,8 @@ export default function Home() {
   const [step, setStep] = useState<number>(0);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof signUpFormSchema>>({
+    resolver: zodResolver(signUpFormSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -51,7 +51,7 @@ export default function Home() {
   // 폼 데이터가 변화할 때마다 콘솔창 출력
   console.log(form.watch());
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof signUpFormSchema>) {
     const { password, confirmPassword } = values;
     if (password !== confirmPassword) {
       toast({
