@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/themeProvider";
 import { ModeToggle } from "@/components/modeToggle";
+import RecoilRootWrapper from "@/recoil/recoilRootWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,21 +15,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  auth,
 }: Readonly<{
   children: React.ReactNode;
+  auth: React.ReactNode;
 }>) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ModeToggle className={"absolute top-6 right-6"} />
-          {children}
-        </ThemeProvider>
+        <RecoilRootWrapper>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ModeToggle className={"absolute top-6 right-6"} />
+            {children}
+            {auth}
+          </ThemeProvider>
+        </RecoilRootWrapper>
         <Toaster />
       </body>
     </html>

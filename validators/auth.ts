@@ -30,11 +30,9 @@ export const signUpFormSchema = z.object({
       passwordRegex,
       "비밀번호는 최소 6자리 이상, 영문, 숫자, 특수문자를 포함해야 합니다."
     ),
-  logInEmail: z.string(),
-  logInPassword: z.string(),
 });
 
 export const logInFormSchema = z.object({
-  email: z.string(),
-  password: z.string(),
+  email: z.string().email("올바른 이메일을 입력해주세요."),
+  password: z.string().min(1, "비밀번호를 입력해주세요."),
 });
