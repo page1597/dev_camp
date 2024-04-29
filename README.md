@@ -1,25 +1,28 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 
+항해 데브캠프에서 진행한 과제
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 시작하기
+### yarn
+```shell
+$ git clone https://github.com/page1597/dev_camp.git
+$ yarn install
+$ yarn dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
+### npm
+```shell
+$ git clone https://github.com/page1597/dev_camp.git
+$ npm install
+$ npm run dev
+```
+## 주요 기능
+- <b>회원가입 및 로그인</b>
+- <b>결제</b>
+  - 주문자/배송 정보 수정
+  - 쿠폰/포인트 적용
+  - 아임웹(imweb)을 사용한 결제 기능
+    
+## 기술 스택
+- Next.js, Tailwind CSS, shadcn/ui, React Hook Form, Zod
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
