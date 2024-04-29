@@ -484,12 +484,11 @@ export default function Page() {
                 className="grid grid-cols-2"
               >
                 {paymentMethod.map((method) => (
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      key={method.index}
-                      value={method.value}
-                      id={method.value}
-                    />
+                  <div
+                    className="flex items-center space-x-2"
+                    key={method.index}
+                  >
+                    <RadioGroupItem value={method.value} id={method.value} />
                     <Label htmlFor={method.value}>{method.value}</Label>
                   </div>
                 ))}
