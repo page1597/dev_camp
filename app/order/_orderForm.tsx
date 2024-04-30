@@ -69,6 +69,10 @@ export default function OrderForm({
     agreed: false, // 구매조건 확인 및 결제진행 동의
   });
 
+  const finalPaymentAmountBeforeShippingFee =
+    shippingInfo.productPrice -
+    (shippingInfo.pointAmount + shippingInfo.cuponAmount);
+
   useEffect(() => {
     let total = 0;
     ordersInfo.forEach((orders) =>
@@ -81,6 +85,8 @@ export default function OrderForm({
       productPrice: total,
     });
   }, []);
+
+  const [selectedCuponPrice, setSelectedCuponPrice] = useState<number>(0);
 
   function onSelectCupon(value: string) {
     // 쿠폰 이름 선택
@@ -106,6 +112,20 @@ export default function OrderForm({
       cuponPrice = amount;
     }
 
+    setSelectedCuponPrice(cuponPrice);
+  }
+
+  function onChooseCupon() {
+    let cuponPrice = selectedCuponPrice;
+    if (cuponPrice > shippingInfo.productPrice - shippingInfo.pointAmount) {
+      alert(
+        "선택한 쿠폰의 금액이 상품 가격을 초과하여 최대 할인 금액을 상품 가격으로 제한합니다"
+      );
+      cuponPrice = Math.max(
+        shippingInfo.productPrice - shippingInfo.pointAmount,
+        0
+      );
+    }
     setShippingInfo({
       ...shippingInfo,
       cuponAmount: cuponPrice,
@@ -146,21 +166,57 @@ export default function OrderForm({
       [id]: value,
     });
   }
+
+  const [pointToUse, setPointToUse] = useState<number>(0);
   // 사용할 포인트 설정
   function onPointChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { value } = e.target;
+    setPointToUse(parseInt(value));
+  }
+
+  function onChoosePoint() {
+    let pointPrice = pointToUse;
+
+    if (pointPrice > userInfo.point) {
+      alert("보유 포인트 이상 사용은 불가능합니다.");
+      pointPrice = 0;
+    }
+
+    if (pointPrice > shippingInfo.productPrice - shippingInfo.cuponAmount) {
+      alert(
+        "포인트가 상품 가격을 초과하여 최대 할인 금액을 상품 가격으로 제한합니다."
+      );
+      pointPrice = Math.max(
+        shippingInfo.productPrice - shippingInfo.cuponAmount,
+        0
+      );
+    }
+    setPointToUse(pointPrice);
     setShippingInfo({
       ...shippingInfo,
-      pointAmount: parseInt(value),
+      pointAmount: pointPrice,
     });
   }
 
   // 보유 포인트 전액 사용
   function onUseAllPoints() {
+    let pointPrice = userInfo.point;
+
+    if (pointPrice > shippingInfo.productPrice - shippingInfo.cuponAmount) {
+      alert(
+        "포인트가 상품 가격을 초과하여 최대 할인 금액을 상품 가격으로 제한합니다."
+      );
+      pointPrice = Math.max(
+        shippingInfo.productPrice - shippingInfo.cuponAmount,
+        0
+      );
+    }
+    setPointToUse(pointPrice);
     setShippingInfo({
       ...shippingInfo,
-      pointAmount: userInfo.point,
+      pointAmount: pointPrice,
     });
+    // userInfo.point에서도 차감하기
   }
 
   // 현금영수증
@@ -432,7 +488,12 @@ export default function OrderForm({
                     ))}
                   </SelectContent>
                 </Select>
-                <Button className="bg-blue-600 rounded-sm">쿠폰적용</Button>
+                <Button
+                  className="bg-blue-600 rounded-sm"
+                  onClick={onChooseCupon}
+                >
+                  쿠폰적용
+                </Button>
               </div>
               <div>쿠폰 번호</div>
               <div className="flex gap-2 mt-2">
@@ -453,7 +514,8 @@ export default function OrderForm({
                   placeholder="0"
                   className="rounded-sm mb-2"
                   onChange={onPointChange}
-                  value={shippingInfo.pointAmount}
+                  value={pointToUse}
+                  onBlur={onChoosePoint}
                 />
                 <Button
                   className="bg-blue-600 rounded-sm"
@@ -493,9 +555,10 @@ export default function OrderForm({
                 <hr className="col-span-2 my-4" />
                 <div>총 결제금액</div>
                 <div className="text-blue-500 rounded-none text-right">
-                  {shippingInfo.productPrice -
-                    (shippingInfo.pointAmount + shippingInfo.cuponAmount) +
-                    shippingInfo.shippingFee}
+                  {(
+                    Math.max(finalPaymentAmountBeforeShippingFee, 0) +
+                    shippingInfo.shippingFee
+                  ).toLocaleString("ko-KR")}
                   원
                 </div>
               </div>
