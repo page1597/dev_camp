@@ -38,7 +38,14 @@ export default function LoginCard() {
 
   function onLogIn(values: z.infer<typeof logInFormSchema>) {
     const { email, password } = values;
-    if (email !== user.email) {
+    if (email === "" || password === "") {
+      toast({
+        variant: "destructive",
+        title: "이메일을 입력해주세요.",
+        duration: 1000,
+      });
+      return;
+    } else if (email !== user.email) {
       toast({
         variant: "destructive",
         title: "이메일이 존재하지 않습니다.",
@@ -72,18 +79,8 @@ export default function LoginCard() {
       <Card className="overflow-hidden flex flex-row border-none">
         <motion.div
           animate={{
-            translateX: `${isOpenLoginAfterSignUp ? (showing ? 100 : 50) : 0}%`,
-          }}
-          transition={{ ease: "easeInOut" }}
-          className="w-full h-full relative z-0"
-        >
-          <Image src="/images/sight.jpg" alt="background" layout="fill" />
-        </motion.div>
-        <motion.div
-          animate={{
-            translateX: `${
-              isOpenLoginAfterSignUp ? (showing ? -100 : 50) : 0
-            }%`,
+            translateX: "100%",
+            // translateX: `${!isOpenLoginAfterSignUp ? (showing ? -0 : 0) : 0}%`,
           }}
           transition={{ ease: "easeInOut" }}
           className="w-full h-full relative z-0 flex items-center bg-white"
@@ -139,6 +136,16 @@ export default function LoginCard() {
               </form>
             </Form>
           </CardContent>
+        </motion.div>
+        <motion.div
+          animate={{
+            translateX: "-100%",
+            // translateX: `${!isOpenLoginAfterSignUp ? (showing ? 0 : 0) : 0}%`,
+          }}
+          transition={{ ease: "easeInOut" }}
+          className="w-full h-full relative z-0"
+        >
+          <Image src="/images/sight.jpg" alt="background" layout="fill" />
         </motion.div>
       </Card>
     </Modal>
