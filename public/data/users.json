@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "홍길동",
+    "phone": "01012345678",
+    "email": "user@imweb.me",
+    "order": [1],
+    "cupon": [
+      {
+        "name": "5천 원 할인쿠폰",
+        "amount": 5000
+      },
+      {
+        "name": "30% 할인쿠폰",
+        "amount": 30
+      }
+    ],
+    "point": 2300
+  },
+  {
+    "id": 2,
+    "name": "김민서",
+    "phone": "01010101010",
+    "email": "minseo@imweb.me",
+    "order": [],
+    "cupon": [],
+    "point": 0
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "orderItem": [
+      {
+        "product": {
+          "id": 123,
+          "name": "Rayon Unbal Lace Top",
+          "price": 18000,
+          "color": ["ivory(아이보리)", "black(블랙)"],
+          "size": ["free"],
+          "image": "/images/product1.jpeg"
+        },
+
+        "color": "ivory(아이보리)",
+        "size": "free",
+        "amount": 1
+      },
+      {
+        "product": {
+          "id": 124,
+          "name": "Black Wide Boots Cut)",
+          "price": 23000,
+          "color": ["blue(블루)", "black(블랙)"],
+          "size": ["m"],
+          "image": "/images/product2.jpg"
+        },
+        "color": "black(블루)",
+        "size": "m",
+        "amount": 1
+      }
+    ]
+  }
+]

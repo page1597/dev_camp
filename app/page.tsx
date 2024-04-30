@@ -11,6 +11,9 @@ export default function Home() {
       <Link href="/login">
         <Button variant="link">Already have an account?</Button>
       </Link>
+      <Link href="order">
+        <Button variant="outline">order</Button>
+      </Link>
     </main>
   );
 }

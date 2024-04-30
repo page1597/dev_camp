@@ -1,0 +1,18 @@
+[
+  {
+    "id": 123,
+    "name": "Rayon Unbal Lace Top",
+    "price": 18000,
+    "color": ["ivory(아이보리)", "black(블랙)"],
+    "size": ["free"],
+    "image": "/images/product1.jpeg"
+  },
+  {
+    "id": 124,
+    "name": "Jean",
+    "price": 23000,
+    "color": ["blue(블루)", "black(블랙)"],
+    "size": ["s", "m", "l"],
+    "image": "/images/product2.jpg"
+  }
+]
