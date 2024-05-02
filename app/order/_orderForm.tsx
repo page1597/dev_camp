@@ -1,3 +1,7 @@
+// 포인트 먼저 적용하고 쿠폰 적용하기
+//
+// 커밋 메시지 내용, 리드미 쓰기
+
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +28,14 @@ import {
 import { Order } from "@/types/order";
 import { User } from "@/types/user";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
+import { nanoid } from "nanoid";
+import {
+  PaymentWidgetInstance,
+  loadPaymentWidget,
+  ANONYMOUS,
+} from "@tosspayments/payment-widget-sdk";
+import { useQuery } from "@tanstack/react-query";
 
 // 배송 메모
 const shippingMemoOptions = [
@@ -40,6 +51,8 @@ const paymentMethod = [
   { id: 4, value: "핸드폰 결제" },
   { id: 5, value: "카카오페이" },
 ];
+const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+const customerKey = nanoid();
 
 export default function OrderForm({
   user,
@@ -86,29 +99,39 @@ export default function OrderForm({
     });
   }, []);
 
+  const [cuponToUse, setCuponToUse] = useState<string>("");
   const [selectedCuponPrice, setSelectedCuponPrice] = useState<number>(0);
+
+  // 정률제 쿠폰인지 여부 반환
+  function isFlatRateCupon(value: string) {
+    return value.includes("%");
+  }
+
+  // 정률제 쿠폰 금액 반환
+  function getAmountOfCupon(value: string): number {
+    let amount;
+    amount = userInfo.cupon.find((cupon) => cupon.name === value)?.amount;
+    if (amount === undefined) {
+      alert("쿠폰이 유효하지 않습니다.");
+      return 0;
+    }
+    return amount;
+  }
 
   function onSelectCupon(value: string) {
     // 쿠폰 이름 선택
     let amount;
     let cuponPrice;
-
+    setCuponToUse(value);
     // 1. 정률제일 경우 (%)
-    if (value.includes("%")) {
-      amount = userInfo.cupon.find((cupon) => cupon.name === value)?.amount;
-      if (amount === undefined) {
-        alert("쿠폰이 유효하지 않습니다.");
-        return;
-      }
-      cuponPrice = shippingInfo.productPrice * (amount / 100);
+    if (isFlatRateCupon(value)) {
+      amount = getAmountOfCupon(value);
+      // 여기 변경하기. 포인트 먼저 적용된 금액으로!
+      cuponPrice = (shippingInfo.productPrice - pointToUse) * (amount / 100);
     }
     // 2. 정액제일 경우 (원)
     else {
-      amount = userInfo.cupon.find((cupon) => cupon.name === value)?.amount;
-      if (amount === undefined) {
-        alert("쿠폰이 유효하지 않습니다.");
-        return;
-      }
+      amount = getAmountOfCupon(value);
       cuponPrice = amount;
     }
 
@@ -126,6 +149,7 @@ export default function OrderForm({
         0
       );
     }
+    alert("쿠폰이 적용되었습니다.");
     setShippingInfo({
       ...shippingInfo,
       cuponAmount: cuponPrice,
@@ -168,6 +192,24 @@ export default function OrderForm({
   }
 
   const [pointToUse, setPointToUse] = useState<number>(0);
+
+  // 쿠폰 먼저 적용하고, 포인트 적용할때 포인트 먼저 적용되게 하기
+  // 정률제일 경우만 해당
+  useEffect(() => {
+    let cuponAmount = 0;
+    let amount;
+
+    // 정률제일 경우
+    if (isFlatRateCupon(cuponToUse)) {
+      amount = getAmountOfCupon(cuponToUse);
+      cuponAmount = (shippingInfo.productPrice - pointToUse) * (amount / 100);
+      setShippingInfo({
+        ...shippingInfo,
+        cuponAmount: cuponAmount,
+      });
+    }
+  }, [pointToUse]);
+
   // 사용할 포인트 설정
   function onPointChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { value } = e.target;
@@ -235,6 +277,57 @@ export default function OrderForm({
     });
   }
 
+  const { data: paymentWidget } = usePaymentWidget(clientKey, customerKey);
+  // const { data: paymentWidget } = usePaymentWidget(clientKey, ANONYMOUS); // 비회원 결제
+  const paymentMethodsWidgetRef = useRef<ReturnType<
+    PaymentWidgetInstance["renderPaymentMethods"]
+  > | null>(null);
+  const agreementsWidgetRef = useRef<ReturnType<
+    PaymentWidgetInstance["renderAgreement"]
+  > | null>(null);
+  const price =
+    Math.max(finalPaymentAmountBeforeShippingFee, 0) + shippingInfo.shippingFee;
+
+  const [paymentMethodsWidgetReady, isPaymentMethodsWidgetReady] =
+    useState(false);
+
+  useEffect(() => {
+    if (paymentWidget == null) {
+      return;
+    }
+
+    // ------  결제위젯 렌더링 ------
+    const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
+      "#payment-widget",
+      { value: price },
+      { variantKey: "DEFAULT" }
+    );
+
+    // ------  이용약관 렌더링 ------
+    // @docs https://docs.tosspayments.com/reference/widget-sdk#renderagreement선택자-옵션
+    paymentWidget.renderAgreement("#agreement", {
+      variantKey: "AGREEMENT",
+    });
+
+    //  ------  결제 UI 렌더링 완료 이벤트 ------
+    paymentMethodsWidget.on("ready", () => {
+      paymentMethodsWidgetRef.current = paymentMethodsWidget;
+      isPaymentMethodsWidgetReady(true);
+    });
+  }, [paymentWidget]);
+
+  useEffect(() => {
+    const paymentMethodsWidget = paymentMethodsWidgetRef.current;
+
+    if (paymentMethodsWidget == null) {
+      return;
+    }
+
+    // ------ 금액 업데이트 ------
+    // @docs https://docs.tosspayments.com/reference/widget-sdk#updateamount결제-금액
+    paymentMethodsWidget.updateAmount(price);
+  }, [price]);
+
   // 결제하기
   function submitPayment() {
     if (!shippingInfo.agreed) {
@@ -255,7 +348,9 @@ export default function OrderForm({
   return (
     <div className="text-zinc-800 flex flex-col font-semibold items-center p-6">
       <h1 className="text-2xl">결제하기</h1>
-      <div className="w-full grid grid-cols-[minmax(_500px,_1fr)_350px] gap-4 mt-14">
+      <div className="w-full grid grid-cols-[minmax(_350px,_1fr)_minmax(_470px,_1fr)] gap-4 mt-14">
+        {/* <div className="w-full grid grid-cols-[minmax(_500px,_1fr)_380px] gap-4 mt-14"> */}
+
         <div className="flex flex-col gap-4">
           <Card className="border-none rounded-none text-sm">
             <CardContent className="p-6">
@@ -264,7 +359,7 @@ export default function OrderForm({
                 {ordersInfo.map((order) => (
                   <div className="flex flex-col gap-2" key={order.id}>
                     {order.orderItem.map((item) => (
-                      <div className="flex gap-4" key={order.id}>
+                      <div className="flex gap-4" key={item.product.id}>
                         <div
                           id={item.product.image}
                           className="w-[100px] h-[100px] overflow-hidden"
@@ -463,7 +558,7 @@ export default function OrderForm({
                 </SelectTrigger>
                 <SelectContent>
                   {shippingMemoOptions.map((option) => (
-                    <SelectItem key={option.id} value={option.value}>
+                    <SelectItem value={option.value} key={option.id}>
                       {option.value}
                     </SelectItem>
                   ))}
@@ -482,14 +577,14 @@ export default function OrderForm({
                   </SelectTrigger>
                   <SelectContent>
                     {userInfo.cupon.map((cupon) => (
-                      <SelectItem key={cupon.name} value={cupon.name}>
+                      <SelectItem value={cupon.name} key={cupon.name}>
                         {cupon.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Button
-                  className="bg-blue-600 rounded-sm"
+                  className="bg-blue-500 rounded-sm"
                   onClick={onChooseCupon}
                 >
                   쿠폰적용
@@ -502,7 +597,7 @@ export default function OrderForm({
                   className="rounded-sm mb-4"
                 />
                 <Button
-                  className="bg-blue-600 rounded-sm"
+                  className="bg-blue-500 rounded-sm"
                   //   onClick={() => console.log(orderInfo)}
                 >
                   번호확인
@@ -518,7 +613,7 @@ export default function OrderForm({
                   onBlur={onChoosePoint}
                 />
                 <Button
-                  className="bg-blue-600 rounded-sm"
+                  className="bg-blue-500 rounded-sm"
                   onClick={onUseAllPoints}
                 >
                   전액사용
@@ -555,11 +650,7 @@ export default function OrderForm({
                 <hr className="col-span-2 my-4" />
                 <div>총 결제금액</div>
                 <div className="text-blue-500 rounded-none text-right">
-                  {(
-                    Math.max(finalPaymentAmountBeforeShippingFee, 0) +
-                    shippingInfo.shippingFee
-                  ).toLocaleString("ko-KR")}
-                  원
+                  {price.toLocaleString("ko-KR")}원
                 </div>
               </div>
               <div className="bg-stone-50 absolute bottom-0 left-0 w-full px-6 py-4">
@@ -569,82 +660,54 @@ export default function OrderForm({
               </div>
             </CardContent>
           </Card>
-          <Card className="border-none rounded-none text-sm">
-            <CardContent className="p-6 ">
-              {/* default check 설정하기 */}
-              <h2 className="font-bold text-base mb-6">결제 방법</h2>
-              <RadioGroup
-                defaultValue="option-one"
-                defaultChecked={true}
-                className="grid grid-cols-2"
-              >
-                {paymentMethod.map((method) => (
-                  <div className="flex items-center space-x-2" key={method.id}>
-                    <RadioGroupItem value={method.value} id={method.value} />
-                    <Label htmlFor={method.value}>{method.value}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-              <div className="flex flex-col gap-2 my-4">
-                <Select>
-                  <SelectTrigger className="rounded-sm">
-                    <SelectValue placeholder="계좌를 선택해주세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">
-                      00은행: 0000-00-0000 예금주명
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input placeholder="입금자명 (미입력시 주문자명)" />
-                <span className="text-zinc-500">
-                  주문 후 n시간 동안 미입금시 자동 취소됩니다.
-                </span>
-              </div>
-              <hr />
-              <div className="mt-4 flex items-center gap-2 text-zinc-800">
-                <Checkbox
-                  id="cashReceipts"
-                  checked={shippingInfo.cashReceipts}
-                  onCheckedChange={onCashReceiptsChange}
-                />
-                <label htmlFor="cashReceipts">현금영수증 신청</label>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none rounded-none text-sm relative">
-            <CardContent className="p-6 pb-16">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 text-zinc-800">
-                  <Checkbox
-                    id="all_agreed"
-                    checked={shippingInfo.agreed}
-                    onCheckedChange={onAgreementChange}
-                  />
-                  <label htmlFor="all_agreed">전체 동의</label>
-                </div>
-                <div className="flex items-center gap-2 text-zinc-800">
-                  &nbsp;
-                  <Checkbox
-                    id="agreed"
-                    checked={shippingInfo.agreed}
-                    onCheckedChange={onAgreementChange}
-                  />
-                  <label htmlFor="agreed">
-                    구매조건 확인 및 결제진행에 동의
-                  </label>
-                </div>
-              </div>
-              <Button
-                onClick={submitPayment}
-                className="bg-blue-600 absolute bottom-0 left-0 w-full rounded-none"
-              >
-                결제하기
-              </Button>
-            </CardContent>
-          </Card>
+
+          <div>
+            <div id="payment-widget" />
+            <div
+              id="agreement"
+              className="bg-zinc-400"
+              style={{ width: "100%" }}
+            />
+
+            <Button
+              disabled={!paymentMethodsWidgetReady}
+              className="w-full bg-blue-500 rounded-none rounded-b-sm text-base py-6"
+              onClick={async () => {
+                try {
+                  // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
+                  // @docs https://docs.tosspayments.com/reference/widget-sdk#requestpayment결제-정보
+                  await paymentWidget?.requestPayment({
+                    orderId: nanoid(),
+                    orderName: `${ordersInfo[0].orderItem[0].product.name}외 ${
+                      ordersInfo[0].orderItem.length - 1
+                    }건`,
+                    customerName: userInfo.name,
+                    customerEmail: userInfo.email,
+                    customerMobilePhone: userInfo.phone,
+                    successUrl: `${window.location.origin}/success`,
+                    failUrl: `${window.location.origin}/fail`,
+                  });
+                } catch (error) {
+                  // 에러 처리하기
+                  console.error(error);
+                }
+              }}
+            >
+              결제하기
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+function usePaymentWidget(clientKey: string, customerKey: string) {
+  return useQuery({
+    queryKey: ["payment-widget", clientKey, customerKey],
+    queryFn: () => {
+      // ------  결제위젯 초기화 ------
+      // @docs https://docs.tosspayments.com/reference/widget-sdk#sdk-설치-및-초기화
+      return loadPaymentWidget(clientKey, customerKey);
+    },
+  });
 }

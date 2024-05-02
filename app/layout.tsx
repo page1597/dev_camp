@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/themeProvider";
 import { ModeToggle } from "@/components/modeToggle";
 import RecoilRootWrapper from "@/recoil/recoilRootWrapper";
+import QueryProvider from "@/components/queryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,16 +25,18 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <RecoilRootWrapper>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ModeToggle className={"absolute top-6 right-6"} />
-            {children}
-            {auth}
-          </ThemeProvider>
+          <QueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <ModeToggle className={"absolute top-6 right-6"} />
+              {children}
+              {auth}
+            </ThemeProvider>
+          </QueryProvider>
         </RecoilRootWrapper>
         <Toaster />
       </body>

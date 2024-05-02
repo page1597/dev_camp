@@ -28,8 +28,6 @@ export default function Page() {
   }, []);
 
   return (
-    <main className="bg-stone-100">
-      {user && orders && <OrderForm user={user} orders={orders} />}
-    </main>
+    <main>{user && orders && <OrderForm user={user} orders={orders} />}</main>
   );
 }
