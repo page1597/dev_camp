@@ -213,7 +213,10 @@ export default function OrderForm({
   // 사용할 포인트 설정
   function onPointChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { value } = e.target;
-    setPointToUse(parseInt(value));
+    const pointValue = Number(value);
+    if (!isNaN(pointValue)) {
+      setPointToUse(parseInt(value));
+    }
   }
 
   function onChoosePoint() {
