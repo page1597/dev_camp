@@ -2,8 +2,7 @@
 <p>항해 데브캠프에서 진행한 과제</p>
 <img width="600" alt="screenshot_signup" src="https://github.com/page1597/dev_camp/assets/62283847/1cb4169e-d9af-41f8-beb5-08febec83ecc">
 <img width="600" alt="screenshot_login" src="https://github.com/page1597/dev_camp/assets/62283847/4f24be49-ae46-4407-ac3b-61581a406695">
-<img width="600" alt="screenshot_order_1" src="https://github.com/page1597/dev_camp/assets/62283847/00ac545f-2c92-493e-957a-2aa40eb5c4b3">
-<img width="600" alt="screenshot_order_2" src="https://github.com/page1597/dev_camp/assets/62283847/180265df-1bbd-4606-8e19-2980c96dae66">
+<img width="600" alt="screenshot_order" src="https://github.com/page1597/dev_camp/assets/62283847/336f3117-cc27-4106-9845-08b63afda6b1">
 
 ## 시작하기
 ### yarn
