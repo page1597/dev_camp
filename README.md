@@ -26,6 +26,10 @@ $ npm run dev
     
 ## 기술 스택
 - Next.js, Tailwind CSS, shadcn/ui, React Hook Form, Zod
+
+## [Blog](https://velog.io/@page1597/series/%EB%8D%B0%EB%B8%8C%EC%BA%A0%ED%94%84-%EA%B3%BC%EC%A0%9C)
+구현 과정 기록
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
