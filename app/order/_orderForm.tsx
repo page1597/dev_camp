@@ -107,7 +107,10 @@ export default function OrderForm({
     return value.includes("%");
   }
 
-  // 정률제 쿠폰 금액 반환
+  /*
+    정액제일 경우: 쿠폰 금액 반환
+    정률제일 경우: 쿠폰 할인율 반환
+  */
   function getAmountOfCupon(value: string): number {
     let amount;
     amount = userInfo.cupon.find((cupon) => cupon.name === value)?.amount;
